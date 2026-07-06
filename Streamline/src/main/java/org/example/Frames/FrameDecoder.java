@@ -1,4 +1,6 @@
-package org.example;
+package org.example.Frames;
+
+import org.example.Protocol;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -36,18 +38,18 @@ public class FrameDecoder {
             if(headerLen != Protocol.HEADER_LENGTH) throw new RuntimeException("headerLen mismatch");
             if(payloadSize < 0 || payloadSize > Protocol.MAX_PAYLOAD_SIZE) throw new RuntimeException("payloadSize mismatch");
 
-
             //verification if the whole frame has arrived
             if(byteBuffer.remaining() < payloadSize){
                 byteBuffer.reset();
                 break;
             }
 
-
             //extract payload
             byte[] payload = new byte[payloadSize];
             byteBuffer.get(payload);
-            //TODO: add checksum here later
+
+            int payloadCheckSum = Protocol.calculateChecksum(payload);
+            if(payloadCheckSum != checkSum){throw new RuntimeException("checkSum mismatch");}
 
             frames.add(new Frame(version,headerLen,FrameType.fromByte(type),flag,requestId, payload, payloadSize));
         }

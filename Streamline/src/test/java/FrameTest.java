@@ -1,4 +1,5 @@
 import org.example.*;
+import org.example.Frames.*;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -11,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class FrameTest {
     @Test
     public void testEncodeDecodeOneFrame() throws Exception {
+        System.out.println("---- Test encode decode One Frame ----");
         long requestId = 123;
         String payload= "Hello!";
         Frame expected = new Frame(Protocol.VERSION, Protocol.HEADER_LENGTH, FrameType.REQUEST, Flags.NONE,
@@ -33,6 +35,7 @@ public class FrameTest {
     //TODO: finish implementing tests
     @Test
     public void testFeedPartialFrame() throws Exception {
+        System.out.println("---- Test encode decode Partial Frame----");
         String payload = "Hello!";
 
         int payloadLength = payload.getBytes(StandardCharsets.UTF_8).length;
@@ -53,7 +56,26 @@ public class FrameTest {
     }
 
     @Test
+    public void testCheckSum() throws Exception {
+        System.out.println("---- Test checksum ----");
+        String payload = "Hello!";
+        int payloadLength = payload.getBytes(StandardCharsets.UTF_8).length;
+
+        Frame frame = new Frame(Protocol.VERSION, Protocol.HEADER_LENGTH, FrameType.REQUEST,
+                Flags.NONE, Protocol.REQUEST_ID,payload.getBytes(StandardCharsets.UTF_8) ,payloadLength);
+
+        FrameEncoder encoder = new FrameEncoder();
+        FrameDecoder decoder = new FrameDecoder();
+        byte[] encoded_bytes = encoder.encodeFrame(frame,123);
+        encoded_bytes[Protocol.HEADER_LENGTH] ^= 1;
+
+        assertThrows(RuntimeException.class, ()->{decoder.feed(encoded_bytes);});
+    }
+
+    @Test
     public void testFeedMultipleFrames() throws Exception {
+        System.out.println("---- Test multiple frames ----");
+
         String payload = "Hello!";
         int payloadLength = payload.getBytes(StandardCharsets.UTF_8).length;
         String payload2 = "This is a test...";
@@ -82,6 +104,7 @@ public class FrameTest {
 
     @Test
     public void testInvalidMagic() throws Exception {
+        System.out.println("---- Test invalid magic ----");
         String payload = "Hello!";
         int payloadLength = payload.getBytes(StandardCharsets.UTF_8).length;
 
@@ -99,6 +122,7 @@ public class FrameTest {
 
     @Test
     public void testPayloadTooLarge() throws Exception {
+        System.out.println("---- Test Large payload ----");
         int sizeInBytes = 17 * 1024 * 1024; //too large
         byte[] payload = new byte[sizeInBytes];
 

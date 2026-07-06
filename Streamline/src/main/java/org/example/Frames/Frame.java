@@ -1,4 +1,4 @@
-package org.example;
+package org.example.Frames;
 
 public class Frame {
     private final byte version;

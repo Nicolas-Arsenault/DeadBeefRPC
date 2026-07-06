@@ -1,4 +1,4 @@
-package org.example;
+package org.example.Frames;
 
 public enum FrameType {
     REQUEST((byte)1),

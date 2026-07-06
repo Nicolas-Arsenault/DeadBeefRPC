@@ -1,4 +1,4 @@
-package org.example;
+package org.example.Frames;
 
 //8 bits for that
 public final class Flags {

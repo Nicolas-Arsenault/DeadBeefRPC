@@ -1,6 +1,9 @@
 package org.example;
 
+import org.example.Frames.Frame;
+
 import java.util.Arrays;
+import java.util.zip.CRC32;
 
 //class with the constants of the protocol
 public class Protocol {
@@ -14,6 +17,13 @@ public class Protocol {
         return frame1.frameType() == frame2.frameType() && Arrays.equals(frame1.payload(), frame2.payload()) &&
                 frame1.flags() == frame2.flags() && frame1.version() == frame2.version() && frame1.requestId() == frame2.requestId() &&
                 frame1.payloadLength() == frame2.payloadLength();
+    }
+
+    public static int calculateChecksum(byte[] payload) {
+        CRC32 crc = new CRC32();
+        crc.update(payload);
+        long checksum = crc.getValue();
+        return (int) checksum;
     }
 
     public static void printFrameDetails(Frame f) {

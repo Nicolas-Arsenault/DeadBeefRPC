@@ -1,8 +1,9 @@
-package org.example;
+package org.example.Frames;
+
+import org.example.Protocol;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 
 public class FrameEncoder {
 
@@ -17,8 +18,8 @@ public class FrameEncoder {
         dos.write(frame.flags());
         dos.writeLong(requestId);
         if(frame.payload().length > Protocol.MAX_PAYLOAD_SIZE) {throw new RuntimeException("Payload too large.");}
-        dos.writeInt(frame.payloadLength()); //TODO: Replace this with the actual payload size.
-        dos.writeInt(calculateChecksum(frame.payload()));
+        dos.writeInt(frame.payloadLength()); //TODO: Replace this with the actual payload size and adjust test.
+        dos.writeInt(Protocol.calculateChecksum(frame.payload()));
         dos.write(frame.payload());
 
         dos.flush();
@@ -26,7 +27,7 @@ public class FrameEncoder {
     }
 
     /// DO NOT USE THIS FUNCTION IT IS FOR TESTING ONLY
-    @Deprecated(forRemoval = false)
+    @Deprecated
     public byte[] encodeFrame(Frame frame, long requestId, int magicByte) throws Exception {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(buffer);
@@ -39,14 +40,12 @@ public class FrameEncoder {
         dos.writeLong(requestId);
         if(frame.payload().length > Protocol.MAX_PAYLOAD_SIZE) {throw new IllegalArgumentException("Payload too large.");}
         dos.writeInt(frame.payloadLength()); //TODO: Replace this with the actual payload size.
-        dos.writeInt(calculateChecksum(frame.payload()));
+        dos.writeInt(Protocol.calculateChecksum(frame.payload()));
         dos.write(frame.payload());
 
         dos.flush();
         return buffer.toByteArray();
     }
 
-    private int calculateChecksum(byte[] payload) {
-        return 1; //TODO: implement
-    }
+
 }
