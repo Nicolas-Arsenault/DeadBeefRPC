@@ -30,6 +30,7 @@ public class FrameDecoder {
             long requestId = byteBuffer.getLong();
             int payloadSize = byteBuffer.getInt();
             int checkSum = byteBuffer.getInt();
+
             if(magic != Protocol.MAGIC_BYTE) throw new RuntimeException("magic byte mismatch");
             if(version != Protocol.VERSION) throw new RuntimeException("version mismatch");
             if(headerLen != Protocol.HEADER_LENGTH) throw new RuntimeException("headerLen mismatch");

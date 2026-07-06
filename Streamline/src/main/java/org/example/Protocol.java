@@ -17,6 +17,7 @@ public class Protocol {
     }
 
     public static void printFrameDetails(Frame f) {
+        System.out.println("====== FRAME ======");
         System.out.println("Frame Type: " + f.frameType());
         System.out.println("Frame Version: " + f.version());
         System.out.println("Frame RequestId: " + f.requestId());
