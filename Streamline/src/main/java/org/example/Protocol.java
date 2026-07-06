@@ -12,6 +12,7 @@ public class Protocol {
     public static final byte HEADER_LENGTH = 24;
     public static final int MAX_PAYLOAD_SIZE =16 * 1024 * 1024;
     public static long REQUEST_ID = 123; //TODO: Make this dynamic
+    public static int SERVER_PORT = 8092;
 
     public static boolean compareFrames(Frame frame1, Frame frame2) {
         return frame1.frameType() == frame2.frameType() && Arrays.equals(frame1.payload(), frame2.payload()) &&

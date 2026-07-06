@@ -1,5 +1,7 @@
 import org.example.*;
 import org.example.Frames.*;
+import org.example.Network.TCPClient;
+import org.example.Network.TCPServer;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -134,5 +136,26 @@ public class FrameTest {
         assertThrowsExactly(RuntimeException.class,()->{
             byte[] encoded_bytes = encoder.encodeFrame(frame1, 123);
         });
+    }
+
+    @Test
+    public void testSendPacket(){
+        System.out.println("---- Test send packet ----");
+        String payload = "Hello!";
+        TCPServer tcpServer = new TCPServer();
+        TCPClient tcpClient = new TCPClient();
+
+        Frame helloFrame = new Frame(Protocol.VERSION, Protocol.HEADER_LENGTH, FrameType.REQUEST,
+                Flags.NONE, Protocol.REQUEST_ID,
+                payload.getBytes(StandardCharsets.UTF_8) ,payload.length());
+        Protocol.printFrameDetails(helloFrame);
+
+        List<Frame> responses = tcpClient.sendFrame(helloFrame);
+        Frame extracted =  responses.get(0);
+        Protocol.printFrameDetails(extracted);
+
+
+        assertTrue(responses.size() == 1 && extracted.frameType() == FrameType.RESPONSE
+        && extracted.requestId() == helloFrame.requestId());
     }
 }
