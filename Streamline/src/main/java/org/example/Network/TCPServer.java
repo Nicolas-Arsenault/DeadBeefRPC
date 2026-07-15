@@ -10,23 +10,34 @@ import java.util.concurrent.Executors;
 
 //TODO: Change this to Netty
 public class TCPServer {
-    ExecutorService executor = Executors.newFixedThreadPool(40);
+    ExecutorService executor;
+    private int port;
 
+    public TCPServer(int port, int nbThreads) {
+        this.port = port;
+        this.executor = Executors.newFixedThreadPool(nbThreads);
+    }
 
-    public TCPServer() {
+    public TCPServer(int port) {
+        this.port = port;
+    }
+
+    /// Start the server
+    public void start() {
         Thread thread = new Thread(this::createServer);
         thread.start();
     }
 
+    /// Handles accepting incoming connections and dispatching them against a threadpool
     private void createServer(){
-        try (ServerSocket serverSocket = new ServerSocket(Protocol.SERVER_PORT)) {
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
             while (true) {
                 Socket clientSocket = serverSocket.accept(); //new client
 
                 executor.execute(() -> {
                     try {
-                        ClientHandler clientHandler = new ClientHandler();
-                        clientHandler.handleClient(clientSocket);
+                        ClientHandler clientHandler = new ClientHandler(clientSocket);
+                        clientHandler.handleClient();
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

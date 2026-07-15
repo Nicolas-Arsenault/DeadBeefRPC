@@ -1,6 +1,6 @@
 import org.example.*;
 import org.example.Frames.*;
-import org.example.Network.TCPClient;
+import org.example.Network.PersistentTCPClient;
 import org.example.Network.TCPServer;
 import org.junit.jupiter.api.Test;
 
@@ -139,18 +139,19 @@ public class FrameTest {
     }
 
     @Test
-    public void testSendPacket(){
+    public void testSendPacket() throws Exception {
         System.out.println("---- Test send packet ----");
         String payload = "Hello!";
-        TCPServer tcpServer = new TCPServer();
-        TCPClient tcpClient = new TCPClient();
+        TCPServer tcpServer = new TCPServer(8052,40); //TODO: MAKE THIS A CONFIGURATION
+        tcpServer.start(); //TODO: Make this in config
+        PersistentTCPClient tcpClient = new PersistentTCPClient("127.0.0.1", 8052); //TODO: Make this a config
 
         Frame helloFrame = new Frame(Protocol.VERSION, Protocol.HEADER_LENGTH, FrameType.REQUEST,
                 Flags.NONE, Protocol.REQUEST_ID,
                 payload.getBytes(StandardCharsets.UTF_8) ,payload.length());
         Protocol.printFrameDetails(helloFrame);
 
-        List<Frame> responses = tcpClient.sendFrame(helloFrame);
+        List<Frame> responses = tcpClient.sendAndWait(helloFrame);
         Frame extracted =  responses.get(0);
         Protocol.printFrameDetails(extracted);
 

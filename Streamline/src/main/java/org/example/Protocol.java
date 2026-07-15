@@ -1,8 +1,11 @@
 package org.example;
 
+import org.example.Frames.Flags;
 import org.example.Frames.Frame;
+import org.example.Frames.FrameType;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.CRC32;
 
 //class with the constants of the protocol
@@ -12,7 +15,8 @@ public class Protocol {
     public static final byte HEADER_LENGTH = 24;
     public static final int MAX_PAYLOAD_SIZE =16 * 1024 * 1024;
     public static long REQUEST_ID = 123; //TODO: Make this dynamic
-    public static int SERVER_PORT = 8092;
+    public static int SERVER_PORT = 8052;
+    private static final AtomicLong requestId = new AtomicLong(1);
 
     public static boolean compareFrames(Frame frame1, Frame frame2) {
         return frame1.frameType() == frame2.frameType() && Arrays.equals(frame1.payload(), frame2.payload()) &&
@@ -36,5 +40,17 @@ public class Protocol {
         System.out.println("Frame Payload: " + f.payload());
         System.out.println("Frame Flags: " + f.flags());
 
+    }
+
+    public static long generateRequestId(){
+        return requestId.getAndIncrement();
+    }
+
+    public static Frame getHeatBeatFrame(long requestId) {
+        return new Frame(
+                VERSION, HEADER_LENGTH,
+                FrameType.HEARTBEAT,
+                Flags.REQUIRES_RESPONSE,
+                requestId);
     }
 }

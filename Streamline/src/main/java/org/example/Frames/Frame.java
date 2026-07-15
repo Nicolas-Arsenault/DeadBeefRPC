@@ -21,6 +21,17 @@ public class Frame {
         this.payloadLength = payloadLength;
     }
 
+    //Empty frame
+    public Frame(byte version, byte headerLength, FrameType frameType, byte flags, long requestId) {
+        this.version = version;
+        this.headerLength = headerLength;
+        this.frameType = frameType;
+        this.flags = flags;
+        this.requestId = requestId;
+        this.payload = new byte[0];
+        this.payloadLength = 0;
+    }
+
     public int payloadLength() {
         return payloadLength;
     }

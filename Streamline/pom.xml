@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.example</groupId>
-    <artifactId>Streamline</artifactId>
+    <artifactId>DeadBeef</artifactId>
     <version>1.0-SNAPSHOT</version>
     <dependencies>
         <!-- JUnit Jupiter Aggregator (Includes API, Engine, and Params) -->

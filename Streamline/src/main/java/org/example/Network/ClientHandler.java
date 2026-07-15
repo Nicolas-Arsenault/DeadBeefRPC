@@ -12,8 +12,13 @@ public class ClientHandler {
     byte[] buffer = new byte[BUFFER_SIZE];
     FrameDecoder frameDecoder = new FrameDecoder();
     FrameEncoder frameEncoder = new FrameEncoder();
+    private Socket clientSocket;
 
-    public void handleClient(Socket clientSocket) throws IOException {
+    public ClientHandler(Socket socket) throws IOException {
+        this.clientSocket = socket;
+    }
+
+    public void handleClient() throws IOException {
         try (InputStream inputStream = clientSocket.getInputStream();
              OutputStream outputStream = clientSocket.getOutputStream()) {
 
@@ -30,7 +35,11 @@ public class ClientHandler {
                     outputStream.flush();
                 }
             }
-        }catch(Exception e){e.printStackTrace();}
+            System.out.println("The client has disconnected"); //TODO : change for good logging later
+        }catch(Exception e){
+
+            e.printStackTrace();
+        }
     }
 
     private Frame craftResponseFrame(Frame frame){

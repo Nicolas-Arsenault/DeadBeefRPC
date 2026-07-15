@@ -4,8 +4,7 @@ public enum FrameType {
     REQUEST((byte)1),
     RESPONSE((byte)2),
     ERROR((byte)3),
-    HEARTBEAT((byte)4);
-
+    HEARTBEAT((byte)4),;
     public final byte code;
 
     FrameType(byte code) {
