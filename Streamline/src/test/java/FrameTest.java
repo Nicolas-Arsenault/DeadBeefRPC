@@ -142,7 +142,7 @@ public class FrameTest {
     public void testSendPacket() throws Exception {
         System.out.println("---- Test send packet ----");
         String payload = "Hello!";
-        TCPServer tcpServer = new TCPServer(8052,40); //TODO: MAKE THIS A CONFIGURATION
+        TCPServer tcpServer = new TCPServer(8052); //TODO: MAKE THIS A CONFIGURATION
         tcpServer.start(); //TODO: Make this in config
         PersistentTCPClient tcpClient = new PersistentTCPClient("127.0.0.1", 8052); //TODO: Make this a config
 

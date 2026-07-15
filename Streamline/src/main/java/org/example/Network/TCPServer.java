@@ -13,13 +13,9 @@ public class TCPServer {
     ExecutorService executor;
     private int port;
 
-    public TCPServer(int port, int nbThreads) {
-        this.port = port;
-        this.executor = Executors.newFixedThreadPool(nbThreads);
-    }
-
     public TCPServer(int port) {
         this.port = port;
+        this.executor = Executors.newVirtualThreadPerTaskExecutor();
     }
 
     /// Start the server
