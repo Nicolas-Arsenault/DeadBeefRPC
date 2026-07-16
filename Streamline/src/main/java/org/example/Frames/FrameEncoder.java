@@ -7,7 +7,7 @@ import java.io.DataOutputStream;
 
 public class FrameEncoder {
 
-    public byte[] encodeFrame(Frame frame, long requestId) throws Exception {
+    public byte[] encodeFrame(Frame frame) throws Exception {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(buffer);
 
@@ -16,7 +16,7 @@ public class FrameEncoder {
         dos.write(Protocol.HEADER_LENGTH);
         dos.write(frame.frameType().code); //frame type
         dos.write(frame.flags());
-        dos.writeLong(requestId);
+        dos.writeLong(Protocol.generateRequestId());
         if(frame.payload().length > Protocol.MAX_PAYLOAD_SIZE) {throw new RuntimeException("Payload too large.");}
         dos.writeInt(frame.payloadLength()); //TODO: Replace this with the actual payload size and adjust test.
         dos.writeInt(Protocol.calculateChecksum(frame.payload()));

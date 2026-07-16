@@ -1,49 +1,60 @@
 package org.example.Network;
 
-import org.example.Frames.*;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.example.Frames.Flags;
+import org.example.Frames.Frame;
+import org.example.Frames.FrameEncoder;
 
-import java.io.*;
-import java.net.Socket;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ClientHandler {
-    private static final int BUFFER_SIZE = 8192;
-    byte[] buffer = new byte[BUFFER_SIZE];
-    FrameDecoder frameDecoder = new FrameDecoder();
-    FrameEncoder frameEncoder = new FrameEncoder();
-    private Socket clientSocket;
+public class ClientHandler extends ChannelInboundHandlerAdapter {
 
-    public ClientHandler(Socket socket) throws IOException {
-        this.clientSocket = socket;
+    private volatile ChannelHandlerContext ctx = null;
+    FrameEncoder encoder = new FrameEncoder();
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        this.ctx = ctx;
+        super.channelActive(ctx);
     }
 
-    public void handleClient() throws IOException {
-        try (InputStream inputStream = clientSocket.getInputStream();
-             OutputStream outputStream = clientSocket.getOutputStream()) {
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        this.ctx = null;
+        super.channelInactive(ctx);
+    }
 
-            int byteread = 0;
-            while((byteread = inputStream.read(buffer)) != -1){
-                byte[] exactPayload = Arrays.copyOf(buffer, byteread);
-                List<Frame> frames = frameDecoder.feed(exactPayload);
+    public List<Frame> sendFrame(Frame frame) throws Exception {
+        int retry = 0;
+        boolean sent = false;
+        int delay = 200;
+        int backoff = 2; //exponential
 
-                //TODO: Change this harcoded temp response
-                for(Frame frame : frames){
-                    Frame resp = craftResponseFrame(frame);
-                    byte[] encoded_bytes = frameEncoder.encodeFrame(resp, frame.requestId());
-                    outputStream.write(encoded_bytes);
-                    outputStream.flush();
+        do{
+            try{
+                if(ctx != null && ctx.channel().isActive()){
+                    byte[] encoded_bytes = encoder.encodeFrame(frame);
+                    ctx.writeAndFlush(encoded_bytes);
                 }
+
+                //TODO: Check to return a promise here if there is a response waiting
+
+                return responses;
+
+            } catch (IOException ex) {
+                Thread.sleep(delay);
+                retry ++;
+                delay *= backoff;
+                ex.printStackTrace();
             }
-            System.out.println("The client has disconnected"); //TODO : change for good logging later
-        }catch(Exception e){
+        } while(!sent && retry < 3);
 
-            e.printStackTrace();
-        }
-    }
-
-    private Frame craftResponseFrame(Frame frame){
-        return new Frame(frame.version(), frame.headerLength(), FrameType.RESPONSE,
-                Flags.NONE, frame.requestId(), frame.payload(), frame.payloadLength());
+        throw  new Exception("Connection timed out");
     }
 }

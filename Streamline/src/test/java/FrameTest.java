@@ -1,9 +1,10 @@
 import org.example.*;
 import org.example.Frames.*;
-import org.example.Network.PersistentTCPClient;
+import org.example.Network.TCPClient;
 import org.example.Network.TCPServer;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -144,7 +145,7 @@ public class FrameTest {
         String payload = "Hello!";
         TCPServer tcpServer = new TCPServer(8052); //TODO: MAKE THIS A CONFIGURATION
         tcpServer.start(); //TODO: Make this in config
-        PersistentTCPClient tcpClient = new PersistentTCPClient("127.0.0.1", 8052); //TODO: Make this a config
+        TCPClient tcpClient = new TCPClient("127.0.0.1", 8052); //TODO: Make this a config
 
         Frame helloFrame = new Frame(Protocol.VERSION, Protocol.HEADER_LENGTH, FrameType.REQUEST,
                 Flags.NONE, Protocol.REQUEST_ID,
@@ -158,5 +159,11 @@ public class FrameTest {
 
         assertTrue(responses.size() == 1 && extracted.frameType() == FrameType.RESPONSE
         && extracted.requestId() == helloFrame.requestId());
+    }
+    
+    //TODO: Fix this test
+    @Test
+    public void test10000Clients() throws IOException, InterruptedException {
+
     }
 }

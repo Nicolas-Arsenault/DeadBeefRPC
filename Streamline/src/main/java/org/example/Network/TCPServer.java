@@ -1,49 +1,47 @@
 package org.example.Network;
 
-import org.example.Protocol;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-//TODO: Change this to Netty
 public class TCPServer {
-    ExecutorService executor;
     private int port;
 
     public TCPServer(int port) {
         this.port = port;
-        this.executor = Executors.newVirtualThreadPerTaskExecutor();
     }
 
     /// Start the server
-    public void start() {
-        Thread thread = new Thread(this::createServer);
-        thread.start();
-    }
+    public void start() throws InterruptedException {
+        EventLoopGroup  bossGroup = new NioEventLoopGroup();
+        EventLoopGroup  workerGroup = new NioEventLoopGroup();
+        try{
+            ServerBootstrap bootstrap = new ServerBootstrap();
+            bootstrap.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(new ChannelInitializer<SocketChannel>(){
+                        @Override
+                        public void initChannel(SocketChannel ch) throws Exception {
+                            ch.pipeline().addLast(new ServerHandler());
+                        }
+                    })
+                    .option(ChannelOption.SO_BACKLOG, 128)
+                    .childOption(ChannelOption.SO_KEEPALIVE,true);
 
-    /// Handles accepting incoming connections and dispatching them against a threadpool
-    private void createServer(){
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
-            while (true) {
-                Socket clientSocket = serverSocket.accept(); //new client
+            ChannelFuture f = bootstrap.bind(port).sync();
+            f.channel().closeFuture().sync();
 
-                executor.execute(() -> {
-                    try {
-                        ClientHandler clientHandler = new ClientHandler(clientSocket);
-                        clientHandler.handleClient();
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-            }
-        } catch (IOException e) {
-            System.err.println("Server error: " + e.getMessage());
-        } finally {
-            executor.shutdown();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        finally {
+            workerGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
         }
     }
-
 }
